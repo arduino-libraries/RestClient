@@ -96,8 +96,8 @@ int RestClient::request(const char* method, String path, String body){
       requestString += contentType;
       requestString += "\n\n";
       requestString += body;
-      requestString += "\n\n";
     }
+    requestString += "\n\n";
     client->print(requestString);
 
     // make sure you've sent all bytes. Ugly hack.
