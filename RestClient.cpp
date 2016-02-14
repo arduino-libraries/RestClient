@@ -30,27 +30,27 @@ RestClient::RestClient(Client& netClient, const char* _host, int _port) {
 }
 
 // GET path
-int RestClient::get(const char* path){
+int RestClient::get(String path){
   return request("GET", path, "");
 }
 
 // POST path and body
-int RestClient::post(const char* path, String body){
+int RestClient::post(String path, String body){
   return request("POST", path, body);
 }
 
 // PUT path and body
-int RestClient::put(const char* path, String body){
+int RestClient::put(String path, String body){
   return request("PUT", path, body);
 }
 
 // DELETE path
-int RestClient::del(const char* path){
+int RestClient::del(String path){
   return request("DELETE", path, "");
 }
 
 // DELETE path and body
-int RestClient::del(const char* path, String body ){
+int RestClient::del(String path, String body ){
   return request("DELETE", path, body);
 }
 
