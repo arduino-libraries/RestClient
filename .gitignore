@@ -1,1 +1,4 @@
-examples/*/config.h
+examples/SimpleGet/config.h
+examples/SimplePutt/config.h
+examples/SimpleDelete/config.h
+examples/full_test_suite/config.h
