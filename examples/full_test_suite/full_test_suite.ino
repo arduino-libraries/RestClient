@@ -79,6 +79,10 @@ void GET_tests() {
   test_status(client.get("/get"));
   test_response(client.readResponse());
 
+ describe("Test GET with path and query");
+  test_status(client.get("/get?name=Bob&age=13"));
+
+
   describe("Test GET with path and header");
   client.setHeader("X-Test-Header: true");
   test_status(client.get("/get-header"));
