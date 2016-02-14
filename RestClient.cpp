@@ -25,7 +25,7 @@ RestClient::RestClient(Client& netClient, const char* _host, int _port) {
   host = _host;
   port = _port;
   num_headers = 0;
-  contentType = "x-www-form-urlencoded";	// default
+  contentType = "application/x-www-form-urlencoded";	// default
   this->client = &netClient;
 }
 
@@ -73,36 +73,36 @@ int RestClient::request(const char* method, String path, String body){
     HTTP_DEBUG_PRINT("HTTP: connected\n");
     HTTP_DEBUG_PRINT("REQUEST: \n");
     // Make a HTTP request line:
-    client->print(method);
-    client->print(" ");
-    client->print(path);
-    client->println(" HTTP/1.1");
+    String requestString = method;
+    requestString += " ";
+    requestString += path;
+    requestString += " HTTP/1.1";
+    requestString += "\n";
     for(int i=0; i<num_headers; i++){
-      client->println(headers[i]);
+      requestString += headers[i];
+      requestString += "\n";
     }
-    client->print("Host: ");
-    client->println(host);
-    client->println("Connection: close");
-
-    // TODO: POST is not sending body right now. Not sure why not
+    requestString += "Host: ";
+    requestString += host;
+    requestString += "\n";
+    requestString += "Connection: close";
+    requestString += "\n";
+    //TODO: deal with binary content
     if(body != ""){
-      //char contentLength[30];
-      //sprintf(contentLength, "Content-Length: %d", body.length());
-      client->print("Content-Length: ");
-      client->println(body.length());
-
-  	  client->print("Content-Type: ");
-  	  client->println(contentType);
-      HTTP_DEBUG_PRINT(body.length());
-      HTTP_DEBUG_PRINT(contentType);
-      client->println();    // empty line after headers
-      client->println(body);
-      HTTP_DEBUG_PRINT(body);
+      requestString += "Content-Length: ";
+      requestString += body.length();
+      requestString += "\n";
+      requestString += "Content-Type: ";
+      requestString += contentType;
+      requestString += "\n\n";
+      requestString += body;
+      requestString += "\n\n";
     }
-      client->println();
+    client->print(requestString);
+
     // make sure you've sent all bytes. Ugly hack.
-    // TODO: check output buffer instead
-    delay(100);
+    // TODO: check output buffer instead?
+    delay(50);
 
     HTTP_DEBUG_PRINT("HTTP: call getResponse\n");
     int statusCode = getResponse();
@@ -114,7 +114,7 @@ int RestClient::request(const char* method, String path, String body){
     if (!client->connected()) {
       HTTP_DEBUG_PRINT("HTTP: stop client\n");
       num_headers = 0;
-      client->stop();
+      //client->stop();
       HTTP_DEBUG_PRINT("HTTP: client stopped\n");
     }
     return statusCode;
