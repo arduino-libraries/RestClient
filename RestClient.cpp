@@ -1,6 +1,7 @@
 #include "Client.h"
 #include "RestClient.h"
 
+//#define HTTP_DEBUG true
 #ifdef HTTP_DEBUG
 #define HTTP_DEBUG_PRINT(string) (Serial.print(string))
 #endif
@@ -16,87 +17,55 @@ RestClient::RestClient(Client& netClient, const char* _host) {
   num_headers = 0;
   contentType = "x-www-form-urlencoded";	// default
   this->client = &netClient;
+  this->responseBody = "";
+  this->timeout = 1000;     // default. TODO: add a setter function
 }
 
 RestClient::RestClient(Client& netClient, const char* _host, int _port) {
   host = _host;
   port = _port;
   num_headers = 0;
-  contentType = "x-www-form-urlencoded";	// default
+  contentType = "application/x-www-form-urlencoded";	// default
   this->client = &netClient;
 }
 
-
-
-
 // GET path
-int RestClient::get(const char* path){
-  return request("GET", path, NULL, NULL);
-}
-
-//GET path with response
-int RestClient::get(const char* path, String* response){
-  return request("GET", path, NULL, response);
+int RestClient::get(String path){
+  return request("GET", path, "");
 }
 
 // POST path and body
-int RestClient::post(const char* path, const char* body){
-  return request("POST", path, body, NULL);
-}
-
-// POST path and body with response
-int RestClient::post(const char* path, const char* body, String* response){
-  return request("POST", path, body, response);
+int RestClient::post(String path, String body){
+  return request("POST", path, body);
 }
 
 // PUT path and body
-int RestClient::put(const char* path, const char* body){
-  return request("PUT", path, body, NULL);
-}
-
-// PUT path and body with response
-int RestClient::put(const char* path, const char* body, String* response){
-  return request("PUT", path, body, response);
+int RestClient::put(String path, String body){
+  return request("PUT", path, body);
 }
 
 // DELETE path
-int RestClient::del(const char* path){
-  return request("DELETE", path, NULL, NULL);
-}
-
-// DELETE path and response
-int RestClient::del(const char* path, String* response){
-  return request("DELETE", path, NULL, response);
+int RestClient::del(String path){
+  return request("DELETE", path, "");
 }
 
 // DELETE path and body
-int RestClient::del(const char* path, const char* body ){
-  return request("DELETE", path, body, NULL);
+int RestClient::del(String path, String body ){
+  return request("DELETE", path, body);
 }
 
-// DELETE path and body with response
-int RestClient::del(const char* path, const char* body, String* response){
-  return request("DELETE", path, body, response);
-}
-
-void RestClient::write(const char* string){
-  HTTP_DEBUG_PRINT(string);
-  client->print(string);
-}
-
-void RestClient::setHeader(const char* header){
+void RestClient::setHeader(String header){
   headers[num_headers] = header;
   num_headers++;
 }
 
-void RestClient::setContentType(const char* contentTypeValue){
+void RestClient::setContentType(String contentTypeValue){
   contentType = contentTypeValue;
 }
 
 // The mother- generic request method.
 //
-int RestClient::request(const char* method, const char* path,
-                  const char* body, String* response){
+int RestClient::request(const char* method, String path, String body){
 
   HTTP_DEBUG_PRINT("HTTP: connect\n");
 
@@ -104,51 +73,50 @@ int RestClient::request(const char* method, const char* path,
     HTTP_DEBUG_PRINT("HTTP: connected\n");
     HTTP_DEBUG_PRINT("REQUEST: \n");
     // Make a HTTP request line:
-    write(method);
-    write(" ");
-    write(path);
-    write(" HTTP/1.1\r\n");
+    String requestString = method;
+    requestString += " ";
+    requestString += path;
+    requestString += " HTTP/1.1";
+    requestString += "\n";
     for(int i=0; i<num_headers; i++){
-      write(headers[i]);
-      write("\r\n");
+      requestString += headers[i];
+      requestString += "\n";
     }
-    write("Host: ");
-    write(host);
-    write("\r\n");
-    write("Connection: close\r\n");
-
-    if(body != NULL){
-      char contentLength[30];
-      sprintf(contentLength, "Content-Length: %d\r\n", strlen(body));
-      write(contentLength);
-
-	  write("Content-Type: ");
-	  write(contentType);
-	  write("\r\n");
+    requestString += "Host: ";
+    requestString += host;
+    requestString += "\n";
+    requestString += "Connection: close";
+    requestString += "\n";
+    //TODO: deal with binary content
+    if(body != ""){
+      requestString += "Content-Length: ";
+      requestString += body.length();
+      requestString += "\n";
+      requestString += "Content-Type: ";
+      requestString += contentType;
+      requestString += "\n\n";
+      requestString += body;
     }
+    requestString += "\n\n";
+    client->print(requestString);
 
-    write("\r\n");
+    // make sure you've sent all bytes. Ugly hack.
+    // TODO: check output buffer instead?
+    delay(50);
 
-    if(body != NULL){
-      write(body);
-      write("\r\n");
-      write("\r\n");
-    }
-
-    //make sure you write all those bytes.
-    delay(100);
-
-    HTTP_DEBUG_PRINT("HTTP: call readResponse\n");
-    int statusCode = readResponse(response);
-    HTTP_DEBUG_PRINT("HTTP: return readResponse\n");
+    HTTP_DEBUG_PRINT("HTTP: call getResponse\n");
+    int statusCode = getResponse();
+    HTTP_DEBUG_PRINT("HTTP: return getResponse\n");
 
     //cleanup
-    HTTP_DEBUG_PRINT("HTTP: stop client\n");
-    num_headers = 0;
-    client->stop();
-    delay(50);
-    HTTP_DEBUG_PRINT("HTTP: client stopped\n");
-
+    // only stop if server disconnected. Otherwise you can
+    // get in an infinite loop in getResponse:
+    if (!client->connected()) {
+      HTTP_DEBUG_PRINT("HTTP: stop client\n");
+      num_headers = 0;
+      //client->stop();
+      HTTP_DEBUG_PRINT("HTTP: client stopped\n");
+    }
     return statusCode;
   }else{
     HTTP_DEBUG_PRINT("HTTP Connection failed\n");
@@ -156,29 +124,24 @@ int RestClient::request(const char* method, const char* path,
   }
 }
 
-int RestClient::readResponse(String* response) {
-
+int RestClient::getResponse() {
+  this->requestStart = millis();
   // an http request ends with a blank line
   boolean currentLineIsBlank = true;
   boolean httpBody = false;
   boolean inStatus = false;
+  // clear response string:
+  this->responseBody = "";
 
   char statusCode[4];
   int i = 0;
   int code = 0;
 
-  if(response == NULL){
-    HTTP_DEBUG_PRINT("HTTP: NULL RESPONSE POINTER: \n");
-  }else{
-    HTTP_DEBUG_PRINT("HTTP: NON-NULL RESPONSE POINTER: \n");
-  }
-
   HTTP_DEBUG_PRINT("HTTP: RESPONSE: \n");
   while (client->connected()) {
-    HTTP_DEBUG_PRINT(".");
-
+  //  HTTP_DEBUG_PRINT(".");
     if (client->available()) {
-      HTTP_DEBUG_PRINT(",");
+    //  HTTP_DEBUG_PRINT(",");
 
       char c = client->read();
       HTTP_DEBUG_PRINT(c);
@@ -197,8 +160,8 @@ int RestClient::readResponse(String* response) {
       }
 
       if(httpBody){
-        //only write response if its not null
-        if(response != NULL) response->concat(c);
+        // add this char tot the responseBody
+        this->responseBody += c;
       }
       else
       {
@@ -215,9 +178,13 @@ int RestClient::readResponse(String* response) {
             currentLineIsBlank = false;
           }
       }
+    } else {
+      // there is a condition where client connects
+      // and available() always <= 0. So timeout is here to catch that:
+      if (millis() - this->requestStart > this->timeout) return 0;
     }
   }
 
-  HTTP_DEBUG_PRINT("HTTP: return readResponse3\n");
+  HTTP_DEBUG_PRINT("HTTP: return getResponse3\n");
   return code;
 }

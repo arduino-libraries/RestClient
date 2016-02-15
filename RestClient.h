@@ -9,44 +9,35 @@ class RestClient {
     RestClient(Client& netClient, const char* _host, int _port);
 
     //Generic HTTP Request
-    int request(const char* method, const char* path,
-                const char* body, String* response);
+    int request(const char* method, String path, String body);
     // Set a Request Header
-    void setHeader(const char*);
+    void setHeader(String header);
     // Set Content-Type Header
-    void setContentType(const char*);
+    void setContentType(String contentTypeValue);
 
     // GET path
-    int get(const char*);
-    // GET path and response
-    int get(const char*, String*);
-
+    int get(String path);
     // POST path and body
-    int post(const char* path, const char* body);
-    // POST path and body and response
-    int post(const char* path, const char* body, String*);
+    int post(String path, String body);
 
     // PUT path and body
-    int put(const char* path, const char* body);
-    // PUT path and body and response
-    int put(const char* path, const char* body, String*);
+    int put(String path, String body);
 
     // DELETE path
-    int del(const char*);
+    int del(String path);
     // DELETE path and body
-    int del(const char*, const char*);
-    // DELETE path and response
-    int del(const char*, String*);
-    // DELETE path and body and response
-    int del(const char*, const char*, String*);
+    int del(String path, String body);
+    String readResponse() {return responseBody;};
 
   private:
     Client* client;
-    int readResponse(String*);
-    void write(const char*);
+    int getResponse();
     const char* host;
     int port;
     int num_headers;
-    const char* headers[10];
-	const char* contentType;
+    String headers[10];
+	  String contentType;
+    String responseBody;
+    int timeout;
+    long requestStart;
 };
