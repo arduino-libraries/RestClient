@@ -1,6 +1,6 @@
 /*
   Simple GET client for RestClient library
-  Connects to server once per second, sends a GET request
+  Connects to server once every five seconds, sends a GET request
 
   note: WiFi SSID and password are stored in config.h file.
   If it is not present, add a new tab, call it "config.h" 
