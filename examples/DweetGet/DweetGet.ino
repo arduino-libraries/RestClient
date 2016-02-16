@@ -3,10 +3,11 @@
   Connects to dweet.io once every ten seconds,
   sends a GET request and a request body. Uses SSL
 
-  Shows how to use Strings to assemble path. dweet.io expects:
+  Shows how to use Strings to assemble path and parse content
+  from response. dweet.io expects:
   https://dweet.io/get/latest/dweet/for/thingName
 
-For more on dweet.io, see https://dweet.io/play/
+  For more on dweet.io, see https://dweet.io/play/
 
   note: WiFi SSID and password are stored in config.h file.
   If it is not present, add a new tab, call it "config.h"
@@ -15,6 +16,7 @@ For more on dweet.io, see https://dweet.io/play/
   char pass[] = "password"; // your network password
 
   created 15 Feb 2016
+  updated 16 Feb 2016
   by Tom Igoe
 
   this example is in the public domain
@@ -25,7 +27,7 @@ For more on dweet.io, see https://dweet.io/play/
 
 char serverAddress[] = "dweet.io";  // server address
 int port = 80;
-String dweetName = "my-thing-name"; // use your own thing name here
+String dweetName = "scandalous-cheese-hoarder"; // use your own thing name here
 
 WiFiClient wifi;
 RestClient client = RestClient(wifi, serverAddress, port);
@@ -69,6 +71,35 @@ void loop() {
   Serial.println(statusCode);
   Serial.print("Response: ");
   Serial.println(response);
+
+  /*
+    Typical response is:
+    {"this":"succeeded",
+    "by":"getting",
+    "the":"dweets",
+    "with":[{"thing":"my-thing-name",
+      "created":"2016-02-16T05:10:36.589Z",
+      "content":{"sensorValue":456}}]}
+
+    You want "content": numberValue
+  */
+  // now parse the response looking for "content":
+  int labelStart = response.indexOf("content\":");
+  // find the first { after "content":
+  int contentStart = response.indexOf("{", labelStart);
+  // find the following } and get what's between the braces:
+  int contentEnd = response.indexOf("}", labelStart);
+  String content = response.substring(contentStart + 1, contentEnd);
+  Serial.println(content);
+
+  // now get the value after the colon, and convert to an int:
+  int valueStart = content.indexOf(":");
+  String valueString = content.substring(valueStart + 1);
+  int number = valueString.toInt();
+  Serial.print("Value string: ");
+  Serial.println(valueString);
+  Serial.print("Actual value: ");
+  Serial.println(number);
 
   Serial.println("Wait ten seconds\n");
   delay(10000);
