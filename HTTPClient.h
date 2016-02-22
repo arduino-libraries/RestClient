@@ -2,11 +2,11 @@
 #include "Client.h"
 
 
-class RestClient {
+class HTTPClient {
 
   public:
-    RestClient(Client& netClient, const char* _host);
-    RestClient(Client& netClient, const char* _host, int _port);
+    HTTPClient(Client& netClient, const char* _host);
+    HTTPClient(Client& netClient, const char* _host, int _port);
 
     //Generic HTTP Request
     int request(const char* method, String path, String body);

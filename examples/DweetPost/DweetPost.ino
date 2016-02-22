@@ -1,5 +1,5 @@
 /*
-  Dweet.io POST client for RestClient library
+  Dweet.io POST client for HTTPClient library
   Connects to dweet.io once every ten seconds,
   sends a POST request and a request body. Uses SSL
 
@@ -16,15 +16,15 @@
 
   this example is in the public domain
 */
-#include <RestClient.h>
+#include <HTTPClient.h>
 #include <WiFi101.h>
 #include "config.h"
 
 char serverAddress[] = "dweet.io";  // server address
-int port = 80;
+int port = 443;
 
-WiFiClient wifi;
-RestClient client = RestClient(wifi, serverAddress, port);
+WiFiSSLClient wifi;
+HTTPClient client = HTTPClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 String response;
 int statusCode = 0;
@@ -57,7 +57,7 @@ void loop() {
 
   // assemble the body of the POST message:
   int sensorValue = analogRead(A0);
-  String postData = "{\"sensorValue\":\""; 
+  String postData = "{\"sensorValue\":\"";
   postData += sensorValue;
   postData += "\"}";
 

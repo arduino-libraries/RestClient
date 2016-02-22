@@ -1,19 +1,20 @@
 /*
-  Simple GET client for RestClient library
+  Simple GET client for HTTPClient library
   Connects to server once every five seconds, sends a GET request
 
   note: WiFi SSID and password are stored in config.h file.
-  If it is not present, add a new tab, call it "config.h" 
+  If it is not present, add a new tab, call it "config.h"
   and add the following variables:
   char ssid[] = "ssid";     //  your network SSID (name)
   char pass[] = "password"; // your network password
 
   created 14 Feb 2016
+  updated 22 Feb 2016
   by Tom Igoe
-  
+
   this example is in the public domain
  */
-#include <RestClient.h>
+#include <HTTPClient.h>
 #include <WiFi101.h>
 #include "config.h"
 
@@ -21,7 +22,7 @@ char serverAddress[] = "192.168.0.3";  // server address
 int port = 8080;
 
 WiFiClient wifi;
-RestClient client = RestClient(wifi, serverAddress, port);
+HTTPClient client = HTTPClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 String response;
 int statusCode = 0;

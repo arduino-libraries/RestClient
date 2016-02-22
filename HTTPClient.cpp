@@ -1,5 +1,5 @@
 #include "Client.h"
-#include "RestClient.h"
+#include "HTTPClient.h"
 
 //#define HTTP_DEBUG true
 #ifdef HTTP_DEBUG
@@ -11,7 +11,7 @@
 #endif
 
 
-RestClient::RestClient(Client& netClient, const char* _host) {
+HTTPClient::HTTPClient(Client& netClient, const char* _host) {
   host = _host;
   port = 80;
   num_headers = 0;
@@ -21,7 +21,7 @@ RestClient::RestClient(Client& netClient, const char* _host) {
   this->timeout = 1000;     // default. TODO: add a setter function
 }
 
-RestClient::RestClient(Client& netClient, const char* _host, int _port) {
+HTTPClient::HTTPClient(Client& netClient, const char* _host, int _port) {
   host = _host;
   port = _port;
   num_headers = 0;
@@ -30,42 +30,42 @@ RestClient::RestClient(Client& netClient, const char* _host, int _port) {
 }
 
 // GET path
-int RestClient::get(String path){
+int HTTPClient::get(String path){
   return request("GET", path, "");
 }
 
 // POST path and body
-int RestClient::post(String path, String body){
+int HTTPClient::post(String path, String body){
   return request("POST", path, body);
 }
 
 // PUT path and body
-int RestClient::put(String path, String body){
+int HTTPClient::put(String path, String body){
   return request("PUT", path, body);
 }
 
 // DELETE path
-int RestClient::del(String path){
+int HTTPClient::del(String path){
   return request("DELETE", path, "");
 }
 
 // DELETE path and body
-int RestClient::del(String path, String body ){
+int HTTPClient::del(String path, String body ){
   return request("DELETE", path, body);
 }
 
-void RestClient::setHeader(String header){
+void HTTPClient::setHeader(String header){
   headers[num_headers] = header;
   num_headers++;
 }
 
-void RestClient::setContentType(String contentTypeValue){
+void HTTPClient::setContentType(String contentTypeValue){
   contentType = contentTypeValue;
 }
 
 // The mother- generic request method.
 //
-int RestClient::request(const char* method, String path, String body){
+int HTTPClient::request(const char* method, String path, String body){
 
   HTTP_DEBUG_PRINT("HTTP: connect\n");
 
@@ -124,7 +124,7 @@ int RestClient::request(const char* method, String path, String body){
   }
 }
 
-int RestClient::getResponse() {
+int HTTPClient::getResponse() {
   this->requestStart = millis();
   // an http request ends with a blank line
   boolean currentLineIsBlank = true;

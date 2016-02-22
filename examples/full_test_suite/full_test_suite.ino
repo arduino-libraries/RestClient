@@ -1,13 +1,15 @@
-/* RestClient full test suite
+/* HTTPClient full test suite
 
    Every REST method is called.
 
    by Chris Continanza (csquared)
    modified by Massimo Banzi (mbanzi) to support more network devices
    modified by Tom Igoe to match new API
+   updated 22 Feb 2016
+   by Tom Igoe
 */
 
-#include <RestClient.h>
+#include <HTTPClient.h>
 #include <WiFi101.h>
 #include "config.h"
 
@@ -18,7 +20,7 @@ char serverAddress[] = "192.168.0.3";  // server address
 int port = 8080;
 
 WiFiClient wifi;
-RestClient client = RestClient(wifi, serverAddress, port);
+HTTPClient client = HTTPClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 
 void setup() {
