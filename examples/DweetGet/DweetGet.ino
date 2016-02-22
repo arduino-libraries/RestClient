@@ -1,5 +1,5 @@
 /*
-  Dweet.io GET client for RestClient library
+  Dweet.io GET client for HTTPClient library
   Connects to dweet.io once every ten seconds,
   sends a GET request and a request body. Uses SSL
 
@@ -16,12 +16,12 @@
   char pass[] = "password"; // your network password
 
   created 15 Feb 2016
-  updated 16 Feb 2016
+  updated 22 Feb 2016
   by Tom Igoe
 
   this example is in the public domain
 */
-#include <RestClient.h>
+#include <HTTPClient.h>
 #include <WiFi101.h>
 #include "config.h"
 
@@ -30,7 +30,7 @@ int port = 80;
 String dweetName = "scandalous-cheese-hoarder"; // use your own thing name here
 
 WiFiClient wifi;
-RestClient client = RestClient(wifi, serverAddress, port);
+HTTPClient client = HTTPClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 String response;
 int statusCode = 0;

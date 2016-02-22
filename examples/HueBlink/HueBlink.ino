@@ -1,6 +1,6 @@
-/* HueBlink example for RestClient library
+/* HueBlink example for HTTPClient library
 
-   Uses ResClient library to control Philips Hue
+   Uses HTTPClient library to control Philips Hue
    For more on Hue developer API see http://developer.meethue.com
 
   To control a light, the Hue expects a HTTP PUT request to:
@@ -14,27 +14,27 @@
   PUT request and the body of the request.
 
   note: WiFi SSID and password are stored in config.h file.
-  If it is not present, add a new tab, call it "config.h" 
+  If it is not present, add a new tab, call it "config.h"
   and add the following variables:
   char ssid[] = "ssid";     //  your network SSID (name)
   char pass[] = "password"; // your network password
 
-   modified 15 Feb 2016 
+   modified 22 Feb 2016
    by Tom Igoe (tigoe) to match new API
 */
 
 #include <SPI.h>
 #include <WiFi101.h>
-#include <RestClient.h>
+#include <HTTPClient.h>
 #include "config.h"
 
 int status = WL_IDLE_STATUS;      // the Wifi radio's status
 char hueHubIP[] = "192.168.0.3";  // IP address of the HUE bridge
 String hueUserName = "huebridgeusername"; // hue bridge username
 
-// make a wifi instance and a RestClient instance:
+// make a wifi instance and a HTTPClient instance:
 WiFiClient wifi;
-RestClient restClient = RestClient(wifi, hueHubIP);
+HTTPClient HTTPClient = HTTPClient(wifi, hueHubIP);
 
 
 void setup() {
@@ -81,13 +81,11 @@ void sendRequest(int light, String cmd, String value) {
   Serial.print("JSON command to server: ");
 
   // make the PUT request to the hub:
-  int statusCode = restClient.put(request, hueCmd);
+  int statusCode = HTTPClient.put(request, hueCmd);
   Serial.println(hueCmd);
   Serial.print("Status code from server: ");
   Serial.println(statusCode);
   Serial.print("Server response: ");
-  Serial.println(restClient.readResponse());
+  Serial.println(HTTPClient.readResponse());
   Serial.println();
 }
-
-
