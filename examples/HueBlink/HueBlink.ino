@@ -34,7 +34,7 @@ String hueUserName = "huebridgeusername"; // hue bridge username
 
 // make a wifi instance and a HTTPClient instance:
 WiFiClient wifi;
-HTTPClient HTTPClient = HTTPClient(wifi, hueHubIP);
+HTTPClient client = HTTPClient(wifi, hueHubIP);
 
 
 void setup() {
@@ -81,11 +81,11 @@ void sendRequest(int light, String cmd, String value) {
   Serial.print("JSON command to server: ");
 
   // make the PUT request to the hub:
-  int statusCode = HTTPClient.put(request, hueCmd);
+  int statusCode = client.put(request, hueCmd);
   Serial.println(hueCmd);
   Serial.print("Status code from server: ");
   Serial.println(statusCode);
   Serial.print("Server response: ");
-  Serial.println(HTTPClient.readResponse());
+  Serial.println(client.readResponse());
   Serial.println();
 }
