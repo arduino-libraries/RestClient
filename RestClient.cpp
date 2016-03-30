@@ -77,28 +77,29 @@ int RestClient::request(const char* method, String path, String body){
     requestString += " ";
     requestString += path;
     requestString += " HTTP/1.1";
-    requestString += "\n";
+    requestString += "\r\n";
     for(int i=0; i<num_headers; i++){
       requestString += headers[i];
-      requestString += "\n";
+      requestString += "\r\n";
     }
     requestString += "Host: ";
     requestString += host;
-    requestString += "\n";
+    requestString += "\r\n";
     requestString += "Connection: close";
-    requestString += "\n";
+    requestString += "\r\n";
     //TODO: deal with binary content
     if(body != ""){
       requestString += "Content-Length: ";
       requestString += body.length();
-      requestString += "\n";
+      requestString += "\r\n";
       requestString += "Content-Type: ";
       requestString += contentType;
-      requestString += "\n\n";
+      requestString += "\r\n\r\n";
       requestString += body;
     }
-    requestString += "\n\n";
+    requestString += "\r\n\r\n";
     client->print(requestString);
+    HTTP_DEBUG_PRINT(requestString);
 
     // make sure you've sent all bytes. Ugly hack.
     // TODO: check output buffer instead?
