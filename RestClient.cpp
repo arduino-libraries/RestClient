@@ -22,7 +22,7 @@ RestClient::RestClient(Client& netClient, const char* _host, int _port) {
   contentType = "application/x-www-form-urlencoded";	// default
   this->client = &netClient;
   this->responseBody = "";
-  this->timeout = 1000;     // default. TODO: add a setter function
+  this->timeout = 10000;     // default. TODO: add a setter function
 }
 
 // GET path
