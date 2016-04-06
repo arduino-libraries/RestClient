@@ -97,10 +97,6 @@ int RestClient::request(const char* method, String path, String body){
     client->print(requestString);
     HTTP_DEBUG_PRINT(requestString);
 
-    // make sure you've sent all bytes. Ugly hack.
-    // TODO: check output buffer instead?
-    delay(50);
-
     HTTP_DEBUG_PRINT("HTTP: call getResponse\n");
     int statusCode = getResponse();
     HTTP_DEBUG_PRINT("HTTP: return getResponse\n");
