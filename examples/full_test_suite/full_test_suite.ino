@@ -12,7 +12,7 @@
 #include "config.h"
 
 int test_delay = 1000; //so we don't spam the API
-boolean describe_tests = true;
+bool describe_tests = true;
 
 char serverAddress[] = "192.168.0.3";  // server address
 int port = 8080;
