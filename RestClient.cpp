@@ -182,7 +182,7 @@ int RestClient::getResponse() {
     } else {
       // there is a condition where client connects
       // and available() always <= 0. So timeout is here to catch that:
-      if (millis() - this->requestStart > this->timeout) return 0;
+      if (millis() - this->requestStart > this->timeout) return code;
     }
   }
 
