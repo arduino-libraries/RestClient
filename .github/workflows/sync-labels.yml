@@ -1,7 +1,7 @@
 # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/sync-labels.md
 name: Sync Labels
 
-# See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+# See: https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
 on:
   push:
     paths:
@@ -24,6 +24,8 @@ env:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -55,6 +57,7 @@ jobs:
   download:
     needs: check
     runs-on: ubuntu-latest
+    permissions: {}
 
     strategy:
       matrix:
@@ -72,20 +75,21 @@ jobs:
       - name: Pass configuration files to next job via workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            *.yaml
-            *.yml
+          path: ${{ matrix.filename }}
           if-no-files-found: error
           name: ${{ env.CONFIGURATIONS_ARTIFACT_PREFIX }}${{ matrix.filename }}
 
   sync:
     needs: download
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Set environment variables
         run: |
-          # See: https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+          # See: https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
           echo "MERGED_CONFIGURATION_PATH=${{ runner.temp }}/labels.yml" >> "$GITHUB_ENV"
 
       - name: Determine whether to dry run
@@ -102,7 +106,7 @@ jobs:
         run: |
           # Use of this flag in the github-label-sync command will cause it to only check the validity of the
           # configuration.
-          echo "::set-output name=flag::--dry-run"
+          echo "flag=--dry-run" >> $GITHUB_OUTPUT
 
       - name: Checkout repository
         uses: actions/checkout@v4
