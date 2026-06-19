@@ -11,14 +11,8 @@
 #endif
 
 
-RestClient::RestClient(Client& netClient, const char* _host) {
-  host = _host;
-  port = 80;
-  num_headers = 0;
-  contentType = "x-www-form-urlencoded";	// default
-  this->client = &netClient;
-  this->responseBody = "";
-  this->timeout = 1000;     // default. TODO: add a setter function
+RestClient::RestClient(Client& netClient, const char* _host) : 
+  RestClient(netClient, _host, 80) {
 }
 
 RestClient::RestClient(Client& netClient, const char* _host, int _port) {
@@ -27,6 +21,8 @@ RestClient::RestClient(Client& netClient, const char* _host, int _port) {
   num_headers = 0;
   contentType = "application/x-www-form-urlencoded";	// default
   this->client = &netClient;
+  this->responseBody = "";
+  this->timeout = 10000;     // default. TODO: add a setter function
 }
 
 // GET path
@@ -100,10 +96,6 @@ int RestClient::request(const char* method, String path, String body){
     requestString += "\r\n\r\n";
     client->print(requestString);
     HTTP_DEBUG_PRINT(requestString);
-
-    // make sure you've sent all bytes. Ugly hack.
-    // TODO: check output buffer instead?
-    delay(50);
 
     HTTP_DEBUG_PRINT("HTTP: call getResponse\n");
     int statusCode = getResponse();
